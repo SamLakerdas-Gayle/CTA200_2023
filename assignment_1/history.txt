@@ -1,0 +1,49 @@
+  259  cd ..
+  260  cd /mnt/scratch-lustre/student01
+  261  pwd
+  262  ls
+  263  pwd
+  264  mkdir /mnt/scratch-lustre/student01/CTA200_2023
+  265  mkdir /mnt/scratch-lustre/student01/CTA200_2023/assignment_1
+  266  touch /mnt/scratch-lustre/student01/CTA200_2023/assignment_1/README.md
+  267  vi README.md
+  268  vi
+  269  vi README.md
+  270  pwd
+  271  cd /
+  272  ls
+  273  cd home
+  274  ls
+  275  cd murray
+  276  ls
+  277  cp ./Hello_world.c /mnt/scratch-lustre/student01/CTA200_2023/assignment_1
+  278  cp ./Hello_world.py /mnt/scratch-lustre/student01/CTA200_2023/assignment_1
+  279  cd /mnt/scratch-lustre/student01/CTA200_2023/assignment_1
+  280  ls
+  281  mv Hello_world.c Hello_world_lakerdas-gayle.c
+  282  ls
+  283  mv Hello_world.py Hello_world_lakerdas-gayle.py
+  284  ls
+  285  module avail
+  286  gcc -o Hello_world_lakerdas-gayle.x Hello_world_lakerdas-gayle.c
+  287  ls
+  288  ./Hello_world_lakerdas-gayle.x
+  289  ./Hello_world_lakerdas-gayle.py
+  290  python Hello_world_lakerdas-gayle.py
+  291  module load python
+  292  python Hello_world_lakerdas-gayle.py
+  293  vi Hello_world_lakerdas-gayle.c
+  294  vi Hello_world_lakerdas-gayle.py
+  295  gcc -o Hello_world_lakerdas-gayle.x Hello_world_lakerdas-gayle.c
+  296  ./Hello_world_lakerdas-gayle.x > output_c.txt
+  297  ./Hello_world_lakerdas-gayle.x
+  298  ./Hello_world_lakerdas-gayle.py
+  299  module load python
+  300  ./Hello_world_lakerdas-gayle.py
+  301  python Hello_world_lakerdas-gayle.py
+  302  python Hello_world_lakerdas-gayle.py > output_python.txt
+  303  ls
+  304  history
+  305  history 45
+  306  history 47
+  307  history 49 > history.txt
