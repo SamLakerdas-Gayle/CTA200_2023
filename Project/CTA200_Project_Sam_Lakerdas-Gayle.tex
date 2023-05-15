@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{esdiff}
+\usepackage{siunitx}
+\usepackage[letter, portrait, margin=1in]{geometry}
+\documentclass{article} 
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{lastpage} 
+\usepackage{textgreek}
+\usepackage{amsfonts}
+\usepackage{extramarks}
+\usepackage{physics}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{xfrac}
+\usepackage{minted}
+\usepackage{xcolor} % to access the named colour LightGray
+\definecolor{LightGray}{gray}{0.9}
+\def\sr{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{ScriptR}}$}}}
+\def\bsr{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{BoldR}}$}}}
+\usepackage{amsmath}
+\newcommand{\boxboi}[1]{\fbox {\parbox{\linewidth}{#1}}}
+
+\title{CTA200 Project}
+\author{Sam Lakerdas-Gayle}
+\date{May 15, 2023}
+
+\begin{document}
+
+\maketitle
+
+\newcommand{\pd}[2][]{\frac{\partial#1}{\partial#2}}
+
+The goal of this project is to find the line-of-sight magnetic field strength in galaxy clusters with a radio galaxy behind or within the galaxy cluster. Radio galaxies give off plumes that are bright in radio and radiate linearly polarised light. As this light passes through magnetic fields in a galaxy cluster, the polarisation angle $\chi$ of the light changes in a process called Faraday rotation, as in Equation \ref{eq:1}
+
+\begin{equation} \label{eq:1}
+    \chi=\chi_0+RM\lambda^2,
+\end{equation}
+
+where $\chi_0$ is the initial polarisation angle of the light, $RM$ is the rotation measure, the strength of Faraday rotation, and $\lambda$ is the wavelength of light. After finding an estimate of the rotation measure, we can find an estimate of the line-of-sight magnetic field strength.
+
+\vspace{0.3 cm}
+
+The data used for this project is a data cube of Stokes Q values over a section of the sky with multiple channels for different frequencies, and a similar data cube for Stokes U values.
+
+\vspace{0.3 cm}
+
+The first step of the project is to read the headers of the data cube FITS files. Here are the findings from the headers:
+
+\begin{itemize}
+    \item Axis 1 corresponds to RA
+    \item Axis 2 corresponds to Dec
+    \item Axis 3 corresponds to Frequency
+    \item Axis 4 corresponds to Stokes
+    \item Number of frequency channels in each cube: 144
+    \item Centre coordinates of image: (RA, Dec) = (307.7026, -54.22826111111) deg
+    \item Centre coordinates of image: Frequency = 1295990740.741 Hz
+    \item Pixel size in the centre of the image: (RA, Dec) = (-0.0005555555555556, 0.0005555555555556) deg
+    \item Stokes Q values have a Stokes value of 2.0 and Stokes U values have a value of 3.0
+    \item Beam Major: 0.003611111111111
+    \item Beam Minor: 0.003611111111111
+    \item Beam Position Angle: 0.0 deg
+    \item Units of Intensity: Jy/beam
+\end{itemize}
+
+By looking at the images on DS9, the plumes seem to end and concentrate at the ends. This indicates that the radio galaxy is an FR II.
+
+\vspace{0.3 cm}
+
+The shape of of the data cubes is (1, 144, 181, 181), meaning that there are 144 frequency channels, and each image has 181x181 pixels.
+
+\vspace{0.3 cm}
+
+In this project, we are looking at a point on the sky with the given coordinates: (RA, Dec)=(306.695, -55.380) degrees. We use the headers to transform these coordinates to the pixel at (x,y) = (76, 76).
+
+\vspace{0.3 cm}
+
+We converting the frequency of each channel to wavelength through the equation $\lambda=\frac{c}{f}$, where $c$ is the speed of light and $f$ is the frequency. Next, we find the off-source ``noise" from each frequency channel by computing the standard deviation of Q and U values in an area of the image with no significant radio sources. We use this noise as the uncertainty of the Q and U parameters. Figure \ref{fig:1} shows the Stokes Q and U values with error bars plotted against the wavelength squared.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics [scale=0.40]{Figures/Stokes_param_err.pdf}
+    \caption{Stokes Q and U values with errors as a function of wavelength squared. Stokes Q is shown in blue and Stokes U is shown in orange.}
+    \label{fig:1}
+\end{figure}
+
+From the Stokes parameters, we compute the polarisation intensity and polarisation angle of the light. Complex polarisation is defined as
+\begin{equation}
+    \tilde{P}=Q+iU,
+\end{equation}
+So we define polarisation intensity as
+\begin{equation}
+    P=\sqrt{Q^2+U^2}
+\end{equation}
+and we define polarisation angle as
+\begin{equation}
+    \chi=\frac{1}{2}\tan^{-1}\big(\frac{U}{Q}\big)
+\end{equation}
+
+We find the uncertainties of these values from propagation of error equations outlined in Appendix A of \href{https://www.aanda.org/articles/aa/pdf/2005/39/aa2990-05.pdf}{arXiv:astro-ph/0507349}. Since $\sigma_Q\neq\sigma_U$, where $\sigma_Q$ is the error in Stokes Q and $\sigma_U$ is the error in Stokes U, we use $$\sigma_P^2=\frac{Q^2}{||P^2||}\sigma_Q^2+\frac{U^2}{||P^2||}\sigma_U^2$$ for the error in polarisation intensity. For error in polarisation angle, we use $$\sigma_{\chi}^2=\frac{U^2\sigma_Q^2+Q^2\sigma_U^2}{4||P||^4}.$$.
+
+\vspace{0.3 cm}
+
+We use SciPy curve\_fit to fit Equation \ref{eq:1} to the polarisation angle as a function of $\lambda^2$. Figure \ref{fig:2} shows $P$ and $\chi$ as a funtion of $\lambda^2$ with the fitted line overlayed on the $\chi$ plot. Since polarisation angle is linear in wavelength squared, it underwent Faraday rotation.
+
+\vspace{0.3 cm}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics [scale=0.40]{Figures/Polarisation_fit.pdf}
+    \caption{Polarisation intensity and polarisation angle as a function of wavelength squared. The orange line is the linear fit. Since polarisation angle is linear in wavelength squared, it underwent Faraday rotation.}
+    \label{fig:2}
+\end{figure}
+
+After fitting the model Equation \ref{eq:1} to the data, we find that $$\chi_0=-2.25\pm0.06\text{ rad}$$ and $$RM=(67\pm1)\frac{\text{rad}}{\text{m}^2}.$$
+
+\vspace{0.3 cm}
+
+Next, we find the line-of-sight magnetic field strength $B_{||}$ of the galaxy cluster. We assume the galaxy cluster is a sphere with diameter $200$ kpc with an electron density of $n_e=0.06$ cm$^{-3}$. If the radio source is located behind the cluster and on the line of sight through the cluster centre, the distance it travels through the cluster is $L_1=200$ kpc because the path through the cluster is the diameter. If the radio source is located at the centre of the cluster, $L_2=100$ kpc because the path through the cluster is the radius.
+
+\vspace{0.3 cm}
+
+We use Equation \ref{eq:5} to find $B_{||}$
+\begin{equation} \label{eq:5}
+    B_{||}=\frac{RM}{812n_eL},
+\end{equation}
+where $B_{||}$ is in $\mu\text{G}$, $RM$ is in $\frac{\text{rad}}{\text{m}^2}$, $n_e$ is in $\text{cm}^{-3}$, and $L$ is in kpc.
+
+We find that for the case where the radio source is located behind the cluster and on the line of sight through the cluster centre, $B_{||}=0.0068\ \mu\text{G}$. For the case where the radio source is located at the centre of the cluster, $B_{||}=0.0137\ \mu\text{G}$.
+\end{document}
